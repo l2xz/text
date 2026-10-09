@@ -1,0 +1,236 @@
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+FedCARE: Client-Adaptive Curriculum and Reference Evolution
+for Federated Direct Preference Optimization
+Anonymous Author(s)
+Submission Id: SUBMISSION-ID
+Abstract
+Direct Preference Optimization (DPO) aligns language models with
+pairwise preferences, but its federated application must accom-
+modate heterogeneous client distributions, unequal usefulness of
+preference pairs, and changing personalized policies. We propose
+FedCARE, a federated DPO framework that couples client-adaptive
+curriculum construction with personalized reference refresh. Each
+client ranks eligible preference pairs using a policy-dependent
+margin: an initial-policy preference gap in the first round and a
+change in that gap between successive personalized checkpoints in
+later rounds. Under a Bradley–Terry clean-preference model and
+bounded implicit-reward approximation error, we derive a margin-
+dependent lower bound on preference validity and an upper bound
+on the associated gradient discrepancy. After scoring and selection,
+each client refreshes its reference from the current pre-update per-
+sonalized checkpoint and freezes it throughout local DPO. We adopt
+the selective LoRA-sharing mechanism of FedSA-LoRA to aggregate
+LoRA-𝐴 while retaining LoRA-𝐵 locally. Under the reported evalu-
+ation protocol,FedCAREachieves 70.26% macro-average accuracy
+on MATH and 24.24 macro-average BLEU on CodeXGLUE, exceed-
+ing the strongest compared baselines by 1.90 percentage points
+and 3.47 BLEU points, respectively. Additional results under cross-
+domain heterogeneity, varying client scales, and multiple backbone
+models further demonstrate the effectiveness and robustness of
+FedCARE.
+CCS Concepts
+•Computing methodologies → Natural language generation.
+Keywords
+federated learning, direct preference optimization, large language
+models, curriculum learning
+ACM Reference Format:
+Anonymous Author(s). 2027.FedCARE: Client-Adaptive Curriculum and
+Reference Evolution for Federated Direct Preference Optimization. InPro-
+ceedings of The ACM Web Conference 2027 (WWW ’27).ACM, New York, NY,
+USA, 12 pages.
+1 Introduction
+Large language models (LLMs) have shown strong capabilities in
+reasoning-intensive tasks such as mathematical problem solving,
+code generation, and logical inference[6, 36]. Unlike general instruc-
+tion following, these tasks require models to maintain coherent
+intermediate steps, long-range consistency, and reliable solution
+verification [22, 35]. Strengthening the reasoning ability of LLMs
+has thus become a central goal of post-training and alignment.
+Preference optimization offers an effective route to this goal.
+Rather than merely imitating reference answers, it trains the model
+to assign higher likelihood to preferred responses than to rejected
+(a) Heterogeneous preference pairs across clients (b) Preference pairs are not equally useful
+0 𝝈
+DPO margin 𝑚𝑖(𝑧)
+Risky
+(negative margin)
+Ambiguous 
+(near-zero / low-gap )
+selected
+Reliable
+(large positive margin)
+(c) Fixed reference becomes mismatched as clients personalize
+Round 1 Round 2 Round 3
+Fixed base reference remains static
+Personalized policy drifts during local 
+adaptation
+Refreshed reference follows previous 
+personalized state
+Ours: refresh reference with previous 𝐴𝑔𝑙𝑜𝑏𝑎𝑙 and 𝐵𝑖
+−∞ +∞
+Fixed reference 𝜋𝑟𝑒𝑓 = 𝜋0
+Personalized policy 𝜋 𝑖
+𝑡 Policy distance from initial base model
+∆
+Client 1
+≻
+Client 2
+≻
+Client 3
+≻
+Shared 
+Adapter
+Personalized 
+AdapterVS
+Refreshed reference (ours)
+Tracking
+Figure 1: Motivation of the proposed method. Federated
+DPO for LLMs faces three coupled challenges: heterogeneous
+client preference distributions, unequal usefulness of prefer-
+ence pairs, and stale reference policies across communication
+rounds.
+ones [5, 28, 32]. Direct Preference Optimization (DPO) streamlines
+this idea by optimizing the policy directly on pairwise preference
+data, removing the need for an explicit reward model or reinforce-
+ment learning [31].
+Most preference optimization methods, however, assume that
+all preference data are centrally available [3, 39]. This assumption
+rarely holds for reasoning-oriented applications, where data are
+split across clients, institutions, or domains under privacy and own-
+ership constraints [18, 20]. Federated learning is a natural remedy,
+but applying DPO directly in a federated setting raises three coupled
+challenges, illustrated in Fig. 1. First, preference distributions are
+heterogeneous: clients differ in reasoning domains, difficulty levels,
+and preference criteria, so a single shared adapter cannot serve
+them all [33]. Second, preference pairs are not equally useful: pairs
+with large model-aware margins provide more reliable preference
+signals, whereas low-margin or ambiguous pairs are more likely to
+contain uncertain, noisy, or unstable supervision [8]. Third, a fixed
+DPO reference can become stale as the personalized client policy
+changes across communication rounds, leaving subsequent local
+updates anchored to an earlier policy state [24]. This motivates a
+client-specific reference refresh schedule that preserves the tempo-
+ral comparison needed for curriculum scoring while updating the
+reference before local optimization.
+To address these challenges, we proposeFedCARE, a federated
+DPO framework based on Client-Adaptive Curriculum and Refer-
+ence Evolution for LLMs. In contrast to conventional federated DPO,
+which trains on a fixed local preference set,FedCAREtreats curricu-
+lum construction as a dynamic, client-specific process: each client
+scores candidate preference pairs by their usefulness and reliability
+1

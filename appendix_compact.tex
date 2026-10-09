@@ -1,0 +1,286 @@
+% Replace the original appendix with this block.
+% Requires the main-paper labels eq:confidence, eq:curriculum,
+% eq:margin_reliability, and eq:local_obj, and the updated local-gradient analysis.
+% Uses the existing booktabs, array, and graphicx packages.
+% Target: approximately three acmart two-column pages; verify in the full project.
+
+\appendix
+\section{Implementation and Selection Details}
+\label{app:selection-analysis}
+
+\paragraph{Candidate admission.}
+The three-round availability schedule is specified in the main paper.
+In Round~3, let $\mathcal{G}_i^t$ contain the scores of valid local
+easy and medium candidates. A local hard pair is admitted when
+\begin{equation}\label{eq:hard_gate_app}
+c_i^t(z)\geq Q_{0.5}(\mathcal{G}_i^t).
+\end{equation}
+The hard gate is inactive if $\mathcal{G}_i^t$ is empty.
+After local ranking, public candidates must reach the 25th percentile
+of selected local scores; this gate is inactive if no local pair is selected.
+Quantiles use the sorted value at zero-based index
+$\operatorname{round}((n-1)q)$. Ties use seeded random ordering.
+Negative margins are not separately excluded. Deduplication identifies
+pairs by their prompt, chosen response, and rejected response; it occurs
+after allocation and can reduce the final curriculum size.
+
+\paragraph{Public budget and parameter rationale.}
+Equation~\eqref{eq:curriculum} prioritizes local pairs and fills only
+the residual budget with eligible public pairs. The public-count cap
+is $\lfloor\eta_tN_t\rfloor$, with $\eta_1=0.5$ and
+$\eta_2=\eta_3=1$; it is not a bound on the public fraction of the
+realized set. The Round~1 cap limits supplementation during cold start.
+Later rounds retain local-first allocation and the relative admission
+gate without an additional public-count cap. The lower-quartile gate
+provides a permissive client-relative screen rather than a fixed
+absolute threshold. The symmetric interval $[-0.5,0.5]$ maps zero margin
+to $0.5$, and $\epsilon=10^{-4}$ avoids exact endpoint scores.
+These are design choices, not empirically optimized thresholds.
+
+\paragraph{Single-field score sensitivity.}
+For the mapping $f$ in Eq.~\eqref{eq:confidence}, nonexpansiveness
+of clipping gives
+\begin{equation}
+|f(m+v)-f(m)|\leq\frac{|v|}{U-L}.
+\end{equation}
+If each margin changes by at most $\nu$, each score changes by at most
+$s=\nu/(U-L)$. On a fixed candidate list, a top-$k$ boundary gap
+greater than $2s$ preserves membership. A quantile changes by at most
+$s$, so a gate decision is preserved when its original threshold
+distance exceeds $2s$, provided the reference list is fixed.
+Changing $[L,U]$ preserves rankings and quantile decisions when all
+compared scores remain in the strictly affine region under both
+intervals. Saturation and changing candidate lists can invalidate
+this conclusion; these bounds do not establish empirical insensitivity.
+
+\paragraph{Multi-field implementation.}
+The released selector also supports pooling available margin fields.
+For field $j$, set $p_j=f(m_j)$ and compute
+\begin{equation}
+c_{\mathrm{pool}}=
+\frac{\prod_j p_j}{\prod_j p_j+\prod_j(1-p_j)}.
+\end{equation}
+The default field list is \texttt{client\_margin},
+\texttt{reward\_gap}, \texttt{implicit\_reward\_gap},
+\texttt{teacher\_margin}, \texttt{dpo\_margin},
+\texttt{margin}, and \texttt{margins}; only finite available values
+are used. The scorer writes the same value to
+\texttt{client\_margin} and \texttt{dpo\_margin}.
+If these are the only fields, pooling gives
+$p^2/[p^2+(1-p)^2]$, a strictly increasing function of the
+single-field score $p$. Different additional fields can change rankings.
+Setting \texttt{BEES\_MARGIN\_KEYS=client\_margin} recovers the
+single-field rule. The preceding sensitivity bound applies to $f$;
+repeated fields are not independent evidence of preference validity.
+
+\section{Derivations for Margin-Based Selection}
+\label{app:preference-validity}
+
+\paragraph{Sufficient condition for margin alignment.}
+Use the main-paper definitions of $q_i(z)$, $p_i(z)$, and
+$\mathcal{H}_i^t$. For a fixed reference $\rho$, the ideal
+KL-regularized reward objective has optimizer
+$\pi^*(y\mid x)=\rho(y\mid x)
+\exp(a r_i^*(x,y)/\beta)/Z(x)$, assuming a finite normalizer.
+This follows by writing the objective as
+$\beta\log Z(x)-\beta\operatorname{KL}(\pi\|\pi^*)$.
+For $t\geq2$, suppose the current scoring policy $\pi_i^t$ and
+retained reference $\rho_i^t$ satisfy, on candidate responses,
+\begin{equation}\label{eq:app_ideal_policy}
+\log\frac{\pi_i^t(y\mid x)}{\rho_i^t(y\mid x)}
+=\frac{a_i^t r_i^*(x,y)}{\beta}
+-\log Z_i^t(x)+\xi_i^t(x,y),
+\end{equation}
+where $a_i^t>0$ and $|\xi_i^t(x,y)|\leq b_i^t$.
+Subtracting chosen and rejected terms cancels the normalizer, yielding
+\begin{equation}\label{eq:app_margin_approx}
+\begin{aligned}
+m_i^t(z)&=a_i^tq_i(z)+e_i^t(z),\\
+e_i^t(z)&=\beta[\xi_i^t(x,y^w)-\xi_i^t(x,y^l)],
+\end{aligned}
+\end{equation}
+with $|e_i^t(z)|\leq2\beta b_i^t$.
+This is a sufficient condition, not a guarantee of finite local
+training or aggregation. Round~1 requires a separate alignment
+assumption because it uses the initial-policy gap.
+
+\paragraph{Validity and selected-set bounds.}
+Under $|e_i^t(z)|\leq\delta_i^t$,
+$q_i(z)\geq(m_i^t(z)-\delta_i^t)/a_i^t$.
+Sigmoid monotonicity proves Eq.~\eqref{eq:margin_reliability}.
+For two candidates,
+\begin{equation}
+q_i(z_1)-q_i(z_2)
+\geq\frac{m_i^t(z_1)-m_i^t(z_2)-2\delta_i^t}{a_i^t},
+\end{equation}
+so margin separation exceeding $2\delta_i^t$ guarantees their
+clean-reward ordering. For the realized nonempty curriculum
+$\mathcal{S}=\mathcal{D}_i^t$ with minimum raw margin $\gamma_i^t$,
+linearity of conditional expectation gives
+\begin{equation}\label{eq:app_selected_errors}
+\begin{aligned}
+\mathbb{E}\!\left[
+\frac{\sum_{z\in\mathcal{S}}(1-C_z)}{|\mathcal{S}|}
+\,\middle|\,\mathcal{H}_i^t\right]
+&=\frac{\sum_{z\in\mathcal{S}}(1-p_i(z))}{|\mathcal{S}|}\\
+&\leq\sigma\!\left(
+\frac{\delta_i^t-\gamma_i^t}{a_i^t}\right).
+\end{aligned}
+\end{equation}
+Mutual independence among comparisons is unnecessary.
+The budget does not ensure $\gamma_i^t>\delta_i^t$.
+
+\paragraph{Gradient bound.}
+For $h_{\vartheta}(z)=\beta\Delta_i^t(z)$, the binary
+comparison loss has gradient
+$(\sigma(h_{\vartheta}(z))-C)\nabla_{\vartheta}h_{\vartheta}(z)$.
+Consequently,
+\begin{equation}
+\begin{aligned}
+&\nabla_{\vartheta}\ell_1
+-\mathbb{E}[\nabla_{\vartheta}\ell_{C_z}\mid z,\mathcal{H}_i^t]\\
+&\qquad=-(1-p_i(z))\nabla_{\vartheta}h_{\vartheta}(z).
+\end{aligned}
+\end{equation}
+Averaging over $\mathcal{S}$, applying the triangle inequality,
+and using $\|\nabla_{\vartheta}\Delta_i^t(z)\|\leq G_i^t$
+and Eq.~\eqref{eq:app_selected_errors} proves the main-paper
+gradient-discrepancy bound. Both objectives use the same selected
+pairs and frozen reference. These conclusions depend on alignment
+and do not establish calibration or reasoning correctness;
+sequence margins can also depend on response length and formatting.
+
+\paragraph{Conditional local descent.}
+View Eq.~\eqref{eq:local_obj} as a function of the trainable
+LoRA factors $\phi$. If its gradient is $L_F$-Lipschitz along
+a full-gradient step $\phi^+=\phi-\lambda\nabla\mathcal{L}_i^t(\phi)$,
+the descent lemma gives
+\begin{equation}
+\begin{aligned}
+\mathcal{L}_i^t(\phi^+)
+&\leq\mathcal{L}_i^t(\phi)\\
+&\quad-\lambda\left(1-\frac{L_F\lambda}{2}\right)
+\|\nabla\mathcal{L}_i^t(\phi)\|^2,
+\end{aligned}
+\end{equation}
+for $0<\lambda<2/L_F$. This concerns a fixed local objective;
+it does not cover stochastic optimizer steps or establish
+convergence across aggregation and curriculum changes.
+
+\section{Training Configuration}
+\label{app:hyperparameters}
+Table~\ref{tab:hyperparameters} lists the reported settings.
+Mixed precision, gradient checkpointing, and FlashAttention-2
+support memory-efficient training.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Training and selection settings. $N_t$ is a target budget;
+the realized size may be smaller.}
+\label{tab:hyperparameters}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.02}
+\begin{tabular}{@{}p{0.43\columnwidth}p{0.53\columnwidth}@{}}
+\toprule
+\textbf{Item} & \textbf{Setting} \\
+\midrule
+Default backbone & Qwen2.5-7B \\
+Hardware & 4 NVIDIA RTX 6000 GPUs \\
+Clients & 7 MATH; 6 CodeXGLUE \\
+Communication rounds & 3 \\
+DPO scale $\beta$ & 0.1 \\
+Score implementation & Available-field pooling \\
+Clipping $[L,U]$; floor $\epsilon$ & $[-0.5,0.5]$; $10^{-4}$ \\
+Budget $N_1=N_2=N_3$ & 1000 pairs per client \\
+Public cap $\eta_1;\eta_{2,3}$ & 0.5; 1 (no additional cap) \\
+Public / hard quantile & 0.25 / 0.50 (Round~3) \\
+Negative-margin exclusion & None \\
+Tie-breaking / ordering & Seeded \\
+Maximum sequence length & 1024 \\
+Learning rate / warm-up & $2\times10^{-6}$ / 0.01 \\
+Epochs per round & 1 \\
+Global / micro batch size & 8 / 1 \\
+Precision / DeepSpeed & bfloat16 / ZeRO Stage~2 \\
+LoRA rank / scaling / dropout & 64 / 128 / 0.1 \\
+LoRA target modules & \texttt{q\_proj}, \texttt{k\_proj},
+\texttt{v\_proj}, \texttt{o\_proj}, \texttt{gate\_proj},
+\texttt{up\_proj}, \texttt{down\_proj} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Supplementary Experimental Results}
+\label{app:additional-results}
+
+\paragraph{Client-level round trajectories.}
+Tables~\ref{tab:math_iter_results} and~\ref{tab:codexglue_iter_results}
+provide the client-level values underlying the aggregate trajectories.
+MATH improves in six of seven subjects from Round~2 to Round~3;
+Intermediate Algebra changes from 53.50\% to 53.20\%.
+All six CodeXGLUE clients improve over the three rounds.
+
+\begin{table}[t]
+\centering
+\small
+\caption{MATH accuracy (\%) by communication round.
+Avg. is the subject macro average.}
+\label{tab:math_iter_results}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Task} & \textbf{R1} & \textbf{R2} & \textbf{R3} \\
+\midrule
+Algebra & 84.30 & 89.60 & 91.20 \\
+Counting & 51.30 & 65.20 & 69.60 \\
+Geometry & 50.70 & 59.10 & 60.80 \\
+Inter. Alg. & 51.10 & 53.50 & 53.20 \\
+Num. Theory & 65.60 & 72.40 & 74.40 \\
+Prealgebra & 74.10 & 83.10 & 86.20 \\
+Precalc. & 52.20 & 55.30 & 56.40 \\
+\midrule
+Avg. & 61.33 & 68.31 & 70.26 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\caption{CodeXGLUE BLEU-4 by communication round.
+Avg. is the language macro average.}
+\label{tab:codexglue_iter_results}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Language} & \textbf{R1} & \textbf{R2} & \textbf{R3} \\
+\midrule
+Go & 8.52 & 9.13 & 12.06 \\
+Java & 9.34 & 9.98 & 11.06 \\
+JS & 6.32 & 6.49 & 8.53 \\
+PHP & 13.85 & 14.23 & 14.68 \\
+Py. & 59.47 & 79.80 & 90.81 \\
+Ruby & 6.33 & 6.73 & 8.27 \\
+\midrule
+Avg. & 17.31 & 21.06 & 24.24 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{CodeXGLUE curriculum visualization.}
+\label{app:curriculum-selection}
+Figure~\ref{fig:curriculum_code_selection_three_rounds} complements
+the MATH visualization with programming-language clients.
+The selected distributions vary across clients and rounds,
+illustrating personalized selection within the shared availability schedule.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth,height=0.34\textheight,keepaspectratio]
+{figure/three_round_selected_difficulty_code.pdf}
+\caption{Candidate and selected margin distributions on CodeXGLUE,
+grouped by client, difficulty, and communication round.}
+\Description{Candidate and selected CodeXGLUE margin distributions
+across programming-language clients and three rounds.}
+\label{fig:curriculum_code_selection_three_rounds}
+\end{figure*}

@@ -1,0 +1,231 @@
+1161
+1162
+1163
+1164
+1165
+1166
+1167
+1168
+1169
+1170
+1171
+1172
+1173
+1174
+1175
+1176
+1177
+1178
+1179
+1180
+1181
+1182
+1183
+1184
+1185
+1186
+1187
+1188
+1189
+1190
+1191
+1192
+1193
+1194
+1195
+1196
+1197
+1198
+1199
+1200
+1201
+1202
+1203
+1204
+1205
+1206
+1207
+1208
+1209
+1210
+1211
+1212
+1213
+1214
+1215
+1216
+1217
+1218
+FedCARE: Client-Adaptive Curriculum and Reference Evolution for Federated Direct Preference Optimization WWW ’27, Dates to be confirmed, Location to be confirmed
+1219
+1220
+1221
+1222
+1223
+1224
+1225
+1226
+1227
+1228
+1229
+1230
+1231
+1232
+1233
+1234
+1235
+1236
+1237
+1238
+1239
+1240
+1241
+1242
+1243
+1244
+1245
+1246
+1247
+1248
+1249
+1250
+1251
+1252
+1253
+1254
+1255
+1256
+1257
+1258
+1259
+1260
+1261
+1262
+1263
+1264
+1265
+1266
+1267
+1268
+1269
+1270
+1271
+1272
+1273
+1274
+1275
+1276
+−15 −10 −5 0 5 10
+Client margin
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12Density
+All: 13.2k
+Selected: 6.0k
+Easy: 6.0k
+Round 1
+0.0 0.5 1.0 1.5 2.0 2.5
+Client margin
+0.0
+0.2
+0.4
+0.6
+0.8
+All: 26.4k
+Selected: 6.0k
+Easy: 3.1k
+Medium: 2.9k
+Round 2
+0 1 2 3
+Client margin
+0.0
+0.2
+0.4
+0.6
+0.8
+All: 33.0k
+Selected: 6.0k
+Easy: 2.6k
+Medium: 2.3k
+Hard: 1.0k
+Round 3
+All candidates
+Selected data
+Easy
+Medium
+Hard
+5-95% range
+Median
+Figure 6: Candidate and selected margin distributions on CodeXGLUE, grouped by client, difficulty, and communication round.
+Table 8: Training and selection settings. 𝑁𝑡 is a target budget;
+the realized size may be smaller.
+Item Setting
+Default backbone Qwen2.5-7B
+Hardware 4 NVIDIA RTX 6000 GPUs
+Clients 7 MATH; 6 CodeXGLUE
+Communication rounds 3
+DPO scale𝛽0.1
+Score implementation Available-field pooling
+Clipping[𝐿, 𝑈]; floor𝜖[ −0.5,0.5];10 −4
+Budget𝑁 1 =𝑁 2 =𝑁 3 1000 pairs per client
+Public cap𝜂 1;𝜂 2,3 0.5; 1 (no additional cap)
+Public / hard quantile 0.25 / 0.50 (Round 3)
+Negative-margin exclusion None
+Tie-breaking / ordering Seeded
+Maximum sequence length 1024
+Learning rate / warm-up2×10 −6 / 0.01
+Epochs per round 1
+Global / micro batch size 8 / 1
+Precision / DeepSpeed bfloat16 / ZeRO Stage 2
+LoRA rank / scaling / dropout 64 / 128 / 0.1
+LoRA target modulesq_proj , k_proj, v_proj, o_proj,
+gate_proj,up_proj,down_proj
+for0 <𝜆< 2/𝐿𝐹 . This concerns a fixed local objective; it does not
+cover stochastic optimizer steps or establish convergence across
+aggregation and curriculum changes.
+C Training Configuration
+Table 8 lists the reported settings. Mixed precision, gradient check-
+pointing, and FlashAttention-2 support memory-efficient training.
+D Supplementary Experimental Results
+Client-level round trajectories.Tables 9 and 10 provide the client-
+level values underlying the aggregate trajectories. MATH improves
+in six of seven subjects from Round 2 to Round 3; Intermediate
+Algebra changes from 53.50% to 53.20%. All six CodeXGLUE clients
+improve over the three rounds.
+Table 9: MATH accuracy (%) by communication round. Avg.
+is the subject macro average.
+Task R1 R2 R3
+Algebra 84.30 89.60 91.20
+Counting 51.30 65.20 69.60
+Geometry 50.70 59.10 60.80
+Inter. Alg. 51.10 53.50 53.20
+Num. Theory 65.60 72.40 74.40
+Prealgebra 74.10 83.10 86.20
+Precalc. 52.20 55.30 56.40
+Avg. 61.33 68.31 70.26
+Table 10: CodeXGLUE BLEU-4 by communication round. Avg.
+is the language macro average.
+Language R1 R2 R3
+Go 8.52 9.13 12.06
+Java 9.34 9.98 11.06
+JS 6.32 6.49 8.53
+PHP 13.85 14.23 14.68
+Py. 59.47 79.80 90.81
+Ruby 6.33 6.73 8.27
+Avg. 17.31 21.06 24.24
+Client-Specific Selection Patterns.Figure 7 provides a client-level
+view of the selection process. Selected and unselected distributions
+differ across clients and rounds, showing that a single global thresh-
+old would not reproduce the resulting curricula. Later rounds admit
+medium and hard pairs without uniformly favoring the nominally
+hardest group. Since no external correctness labels are used in these
+plots, they characterize selection behavior rather than data quality.
+CodeXGLUE curriculum visualization.Figure 6 complements the
+MATH visualization with programming-language clients. The se-
+lected distributions vary across clients and rounds, illustrating
+personalized selection within the shared availability schedule.
+11

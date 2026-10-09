@@ -1,0 +1,215 @@
+813
+814
+815
+816
+817
+818
+819
+820
+821
+822
+823
+824
+825
+826
+827
+828
+829
+830
+831
+832
+833
+834
+835
+836
+837
+838
+839
+840
+841
+842
+843
+844
+845
+846
+847
+848
+849
+850
+851
+852
+853
+854
+855
+856
+857
+858
+859
+860
+861
+862
+863
+864
+865
+866
+867
+868
+869
+870
+WWW ’27, Dates to be confirmed, Location to be confirmed Anon. Submission Id: SUBMISSION-ID
+871
+872
+873
+874
+875
+876
+877
+878
+879
+880
+881
+882
+883
+884
+885
+886
+887
+888
+889
+890
+891
+892
+893
+894
+895
+896
+897
+898
+899
+900
+901
+902
+903
+904
+905
+906
+907
+908
+909
+910
+911
+912
+913
+914
+915
+916
+917
+918
+919
+920
+921
+922
+923
+924
+925
+926
+927
+928
+Table 5: Comparison of federated optimization variants
+on MATH. FedProx adds a local proximal penalty on the
+shared LoRA-𝐴 factors, whereas FedAdam and FedYogi mod-
+ify server-side updates. Ours uses uniform averaging of
+LoRA-𝐴. The remaining FedCARE configuration is held fixed.
+Task FedProx FedAdam FedYogi Ours
+Algebra90.70 90.10 90.10 91.20
+Counting66.90 66.90 66.20 69.60
+Geometry60.10 57.80 58.50 60.80
+Inter. Alg.54.70 54.8054.00 53.20
+Num. Theory 75.4073.50 73.70 74.40
+Prealgebra 86.7084.80 83.50 86.20
+Precalc.56.6057.5057.00 56.40
+Avg.70.16 69.34 69.00 70.26
+Table 6: Component ablations on MATH and CodeXGLUE. Δ
+denotes the change relative toFedCARE; blue values indicate
+decreases.
+Variant MATH CodeXGLUE
+Avg. Acc.ΔAvg. BLEUΔ
+w/o Data Selection
+Full Data 67.91 -2.35 23.67 -0.57
+w/o Client-Adaptive Curriculum Selection
+Random Subset 66.77 -3.49 21.10 -3.14
+Fixed Curriculum 66.86 -3.40 21.24 -3.00
+w/o Dual-LoRA67.23 -3.03 15.70 -8.54
+w/o DPRE69.16 -1.10 20.13 -4.11
+Ours 70.26 – 24.24 –
+Method
+Shared
+update
+Local
+state
+Upload
+/ round
+Time
+/ round
+Full Data Full LoRA – 161.48M 3h14m
+FedIT Full LoRA – 161.48M 1h49m
+FedVA Full LoRA – 161.48M 2h02m
+FedSA LoRA-𝐴LoRA-𝐵72.48M 1h58m
+Ours LoRA-𝐴LoRA-𝐵+ ref. 72.48M 2h14m
+Table 7: Efficiency and communication comparison. Full Data
+uses the complete preference pool. FedSA and Ours reduce
+communication by uploading only LoRA- 𝐴, while Ours adds
+curriculum selection and reference evolution.
+its reported performance under this protocol. We therefore use
+FedAvg as the simplest aggregation rule for the main experiments.
+Analysis of Key Components.Table 6 examines the contributions
+of client-adaptive curriculum selection, Dual-LoRA personalization,
+and DPRE. The complete framework achieves the highest average
+performance on both benchmarks, and removing any component
+reduces its performance. Random Subset and Fixed Curriculum un-
+derperformFedCARE, supporting the benefit of adapting sample se-
+lection to each client’s evolving policy state. Removing Dual-LoRA
+reduces MATH accuracy by 3.03 points and CodeXGLUE BLEU
+by 8.54, highlighting the importance of personalized adaptation.
+Removing DPRE yields corresponding decreases of 1.10 accuracy
+points and 4.11 BLEU, supporting the utility of the personalized
+reference-refresh schedule. Together, these results support inte-
+grating adaptive selection, personalization, and reference evolution
+within federated preference optimization.
+Analysis of Efficiency and Communication.Table 7 compares the
+computation and communication costs of different training strate-
+gies. Full Data trains on the complete available preference pool
+without curriculum filtering, which leads to the longest per-round
+runtime and requires uploading the full LoRA adapter. In contrast,
+FedCAREuses model-aware curriculum selection to train on a
+smaller but more reliable subset, reducing the per-round training
+time from 3h14m to 2h14m. Meanwhile, it uploads only LoRA-𝐴
+and keeps LoRA-𝐵 client-local, resulting in the same communica-
+tion cost as FedSA and much lower upload size than full-LoRA
+aggregation. This shows that the proposed curriculum improves
+data efficiency while preserving communication efficiency.
+4.5 Privacy Considerations
+FedCARE keeps preference data, personalized LoRA-𝐵 factors, and
+reference checkpoints local, communicating only LoRA-𝐴 factors
+for aggregation. This reduces direct exposure of client-specific in-
+formation, although shared updates may still reveal information
+about local data and do not provide a formal privacy guarantee. All
+experiments use public datasets with simulated clients. Additional
+safeguards, such as differential privacy or secure aggregation, could
+be incorporated for privacy-sensitive deployments.
+5 Conclusion
+This paper introducesFedCARE, a federated DPO framework for
+LLMs under heterogeneous client distributions.FedCAREbuilds
+client-adaptive curriculum by selecting preference pairs according
+to client’s evolving policy state, shares transferable LoRA-𝐴 factors
+while keeping client-specific LoRA-𝐵 factors local, and refreshes
+the personalized reference policy through DPRE. Experiments on
+mathematical reasoning and code-to-text generation benchmarks
+show thatFedCAREachieves the best average performance among
+the compared methods, remains effective under cross-domain het-
+erogeneity, and works well with simple FedAvg aggregation. These
+results suggest that effective federated preference optimization re-
+quires not only communication-efficient parameter sharing, but
+also adaptive control over the preference signals introduced to each
+client.
+8

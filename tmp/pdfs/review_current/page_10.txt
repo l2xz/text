@@ -1,0 +1,292 @@
+1045
+1046
+1047
+1048
+1049
+1050
+1051
+1052
+1053
+1054
+1055
+1056
+1057
+1058
+1059
+1060
+1061
+1062
+1063
+1064
+1065
+1066
+1067
+1068
+1069
+1070
+1071
+1072
+1073
+1074
+1075
+1076
+1077
+1078
+1079
+1080
+1081
+1082
+1083
+1084
+1085
+1086
+1087
+1088
+1089
+1090
+1091
+1092
+1093
+1094
+1095
+1096
+1097
+1098
+1099
+1100
+1101
+1102
+WWW ’27, Dates to be confirmed, Location to be confirmed Anon. Submission Id: SUBMISSION-ID
+1103
+1104
+1105
+1106
+1107
+1108
+1109
+1110
+1111
+1112
+1113
+1114
+1115
+1116
+1117
+1118
+1119
+1120
+1121
+1122
+1123
+1124
+1125
+1126
+1127
+1128
+1129
+1130
+1131
+1132
+1133
+1134
+1135
+1136
+1137
+1138
+1139
+1140
+1141
+1142
+1143
+1144
+1145
+1146
+1147
+1148
+1149
+1150
+1151
+1152
+1153
+1154
+1155
+1156
+1157
+1158
+1159
+1160
+A Implementation and Selection Details
+Candidate admission.The three-round availability schedule is
+specified in the main paper. In Round 3, let G𝑡
+𝑖 contain the scores
+of valid local easy and medium candidates. A local hard pair is
+admitted when
+𝑐𝑡
+𝑖 (𝑧) ≥𝑄 0.5 (G 𝑡
+𝑖 ).(21)
+The hard gate is inactive if G𝑡
+𝑖 is empty. After local ranking, public
+candidates must reach the 25th percentile of selected local scores;
+this gate is inactive if no local pair is selected. Quantiles use the
+sorted value at zero-based indexround((𝑛−1)𝑞). Ties use seeded
+random ordering. Negative margins are not separately excluded.
+Deduplication identifies pairs by their prompt, chosen response,
+and rejected response; it occurs after allocation and can reduce the
+final curriculum size.
+Public budget and parameter rationale.Equation (10) prioritizes
+local pairs and fills only the residual budget with eligible public
+pairs. The public-count cap is⌊𝜂𝑡 𝑁𝑡 ⌋, with 𝜂1 = 0.5and 𝜂2 =𝜂 3 = 1;
+it is not a bound on the public fraction of the realized set. The
+Round 1 cap limits supplementation during cold start. Later rounds
+retain local-first allocation and the relative admission gate without
+an additional public-count cap. The lower-quartile gate provides
+a permissive client-relative screen rather than a fixed absolute
+threshold. The symmetric interval [−0.5, 0.5] maps zero margin to
+0.5, and 𝜖= 10−4 avoids exact endpoint scores. These are design
+choices, not empirically optimized thresholds.
+Single-field score sensitivity.For the mapping 𝑓 in Eq. (9), nonex-
+pansiveness of clipping gives
+|𝑓(𝑚+𝑣) −𝑓(𝑚)| ≤ |𝑣|
+𝑈−𝐿 .(22)
+If each margin changes by at most 𝜈, each score changes by at
+most 𝑠=𝜈/(𝑈−𝐿) . On a fixed candidate list, a top- 𝑘 boundary
+gap greater than2 𝑠 preserves membership. A quantile changes
+by at most 𝑠, so a gate decision is preserved when its original
+threshold distance exceeds2 𝑠, provided the reference list is fixed.
+Changing [𝐿, 𝑈] preserves rankings and quantile decisions when
+all compared scores remain in the strictly affine region under both
+intervals. Saturation and changing candidate lists can invalidate this
+conclusion; these bounds do not establish empirical insensitivity.
+Multi-field implementation.The released selector also supports
+pooling available margin fields. For field 𝑗, set 𝑝 𝑗 =𝑓(𝑚 𝑗 ) and
+compute
+𝑐pool =
+Î
+𝑗 𝑝 𝑗
+Î
+𝑗 𝑝 𝑗 + Î
+𝑗 (1−𝑝 𝑗 ) .(23)
+The default field list ismargin,client_margin,reward_gap,
+implicit_reward_gap, teacher_margin and dpo_margin; only
+finite available values are used. The scorer writes the same value to
+client_margin and dpo_margin. If these are the only fields, pool-
+ing gives 𝑝2/[𝑝 2 + ( 1 −𝑝) 2], a strictly increasing function of the
+single-field score 𝑝. Different additional fields can change rankings.
+Setting BEES_MARGIN_KEYS=client_margin recovers the single-
+field rule. The preceding sensitivity bound applies to 𝑓 ; repeated
+fields are not independent evidence of preference validity.
+B Derivations for Margin-Based Selection
+Sufficient condition for margin alignment.Use the main-paper
+definitions of 𝑞𝑖 (𝑧), 𝑝𝑖 (𝑧), and H 𝑡
+𝑖 . For a fixed reference 𝜌, the
+ideal KL-regularized reward objective has optimizer 𝜋 ∗ (𝑦|𝑥)=
+𝜌(𝑦|𝑥)exp(𝑎𝑟 ∗
+𝑖 (𝑥, 𝑦)/𝛽)/𝑍(𝑥) , assuming a finite normalizer. This
+follows by writing the objective as 𝛽log𝑍(𝑥) −𝛽KL(𝜋∥𝜋 ∗). For
+𝑡≥ 2, suppose the current scoring policy 𝜋𝑡
+𝑖 and retained reference
+𝜌𝑡
+𝑖 satisfy, on candidate responses,
+log 𝜋𝑡
+𝑖 (𝑦|𝑥)
+𝜌𝑡
+𝑖 (𝑦|𝑥) = 𝑎𝑡
+𝑖 𝑟 ∗
+𝑖 (𝑥, 𝑦)
+𝛽 −log𝑍 𝑡
+𝑖 (𝑥) +𝜉 𝑡
+𝑖 (𝑥, 𝑦),(24)
+where 𝑎𝑡
+𝑖 > 0and |𝜉 𝑡
+𝑖 (𝑥, 𝑦)| ≤𝑏 𝑡
+𝑖 . Subtracting chosen and rejected
+terms cancels the normalizer, yielding
+𝑚𝑡
+𝑖 (𝑧)=𝑎 𝑡
+𝑖 𝑞𝑖 (𝑧) +𝑒 𝑡
+𝑖 (𝑧),
+𝑒𝑡
+𝑖 (𝑧)=𝛽[𝜉 𝑡
+𝑖 (𝑥, 𝑦𝑤 ) −𝜉 𝑡
+𝑖 (𝑥, 𝑦𝑙 )],
+(25)
+with |𝑒𝑡
+𝑖 (𝑧)| ≤ 2𝛽𝑏𝑡
+𝑖 . This is a sufficient condition, not a guarantee
+of finite local training or aggregation. Round 1 requires a separate
+alignment assumption because it uses the initial-policy gap.
+Validity and selected-set bounds.Under |𝑒𝑡
+𝑖 (𝑧)| ≤𝛿 𝑡
+𝑖 , 𝑞𝑖 (𝑧) ≥
+(𝑚𝑡
+𝑖 (𝑧) −𝛿 𝑡
+𝑖 )/𝑎𝑡
+𝑖 . Sigmoid monotonicity proves Eq. (8). For two
+candidates,
+𝑞𝑖 (𝑧1) −𝑞 𝑖 (𝑧2) ≥ 𝑚𝑡
+𝑖 (𝑧1) −𝑚 𝑡
+𝑖 (𝑧2) −2𝛿 𝑡
+𝑖
+𝑎𝑡
+𝑖
+,(26)
+so margin separation exceeding2 𝛿𝑡
+𝑖 guarantees their clean-reward
+ordering. For the realized nonempty curriculum S=D 𝑡
+𝑖 with
+minimum raw margin 𝛾𝑡
+𝑖 , linearity of conditional expectation gives
+E
+Í
+𝑧∈ S (1−𝐶 𝑧)
+|S|
+ H 𝑡
+𝑖
+
+=
+Í
+𝑧∈ S (1−𝑝 𝑖 (𝑧))
+|S|
+≤𝜎
+ 𝛿𝑡
+𝑖 −𝛾 𝑡
+𝑖
+𝑎𝑡
+𝑖
+
+.
+(27)
+Mutual independence among comparisons is unnecessary. The bud-
+get does not ensure𝛾 𝑡
+𝑖 >𝛿 𝑡
+𝑖 .
+Gradient bound.For ℎ𝜗 (𝑧)=𝛽Δ 𝑡
+𝑖 (𝑧), the binary comparison loss
+has gradient(𝜎(ℎ 𝜗 (𝑧)) −𝐶)∇ 𝜗ℎ𝜗 (𝑧). Consequently,
+∇𝜗 ℓ1 −E[∇ 𝜗 ℓ𝐶𝑧 |𝑧,H 𝑡
+𝑖 ]
+=−(1−𝑝 𝑖 (𝑧))∇ 𝜗ℎ𝜗 (𝑧). (28)
+Averaging over S, using ∥∇𝜗 Δ𝑡
+𝑖 (𝑧) ∥ ≤𝐺 𝑡
+𝑖 and Eq. (27) proves the
+main-paper gradient-discrepancy bound. Both objectives use the
+same selected pairs and frozen reference. These conclusions depend
+on alignment and do not establish calibration or reasoning correct-
+ness; sequence margins can also depend on response length and
+formatting.
+Conditional local descent.View Eq. (14) as a function of the train-
+able LoRA factors 𝜙. If its gradient is 𝐿𝐹 -Lipschitz along a full-
+gradient step𝜙 + =𝜙−𝜆∇L 𝑡
+𝑖 (𝜙), the descent lemma gives
+L𝑡
+𝑖 (𝜙 +) ≤ L 𝑡
+𝑖 (𝜙)
+−𝜆
+
+1− 𝐿𝐹 𝜆
+2
+
+∥∇L 𝑡
+𝑖 (𝜙) ∥2,
+(29)
+10

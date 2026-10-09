@@ -1,0 +1,288 @@
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+FedCARE: Client-Adaptive Curriculum and Reference Evolution for Federated Direct Preference Optimization WWW ’27, Dates to be confirmed, Location to be confirmed
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+Dual-LoRA DPO Update
+𝑾𝟎 + ×𝑩𝒊
+𝒕−𝟏
+𝓛𝒊
+𝒕 = −𝔼𝓓𝒊
+𝒕𝒍𝒐𝒈𝝈(𝜷[𝒓𝒊
+𝒕 𝒙, 𝒚𝒘 − 𝒓𝒊
+𝒕 𝒙, 𝒚𝒍 ])
+𝑨𝒊
+𝒕−𝟏
+Pretrained
+Backbone 𝑾𝟎
+𝑩𝒊
+𝒕−𝟏
+𝑨𝒊
+𝒕−𝟏
+Server
+Pretrained
+Backbone 𝑾𝟎
+Public Dataset
+𝑺
+Client 𝟏
+𝑫𝟏
+𝒕
+Client 𝟐
+𝑫𝟐
+𝒕
+Client 𝒊
+𝑫𝒊
+𝒕
+...
+Shared LoRA-A 
+Aggregation
+𝑨𝒕 = 𝟏
+|𝑺𝒕| ෍
+𝒊𝝐𝑺𝒕
+𝑨𝒊
+𝒕
+① Round 𝟏, Broadcast 𝑾𝟎 and 𝑺 to clients
+Round 𝒊(≥ 𝟏), Broadcast 𝑨𝒕−𝟏to clients
+② Upload 𝑨𝒊
+𝒕 to server
+① ②
+DPRE 𝝅𝒓𝒆𝒇,𝒊
+𝒕
+Frozen
+Trainable
+𝒙
+𝒚𝒘
+𝒚𝒍
+𝒎𝒊
+𝒕 𝒛
+...
+Local + Public Candidates
+𝑺
+ 𝝅𝒊
+𝒕 𝝅𝒓𝒆𝒇,𝒊
+𝒕−𝟏
+ 𝒄𝒊
+𝒕 𝒛
+𝒙
+𝒚𝒘
+𝒚𝒍
+𝑫𝒊
+𝒕
+Figure 2: Overview ofFedCARE. In communication round 𝑡, the server broadcasts the shared LoRA- 𝐴 factor A𝑡−1 . Each client
+scores its staged candidate pool using the current personalized policy and the frozen reference retained from the preceding
+round, then constructs curriculum D𝑡
+𝑖 . After selection and before local DPO, DPRE refreshes the reference from the current
+personalized checkpoint. The reference remains frozen during local optimization. Each client uploads only its updated LoRA- 𝐴
+factor for server aggregation; LoRA-𝐵and local preference data remain client-local.
+3.3 Client-Adaptive Curriculum Construction
+A fixed curriculum may be unsuitable under client heterogeneity
+because the same nominal difficulty can produce different learn-
+ing signals for different client policies.FedCAREtherefore sepa-
+rates candidate availability from candidate ranking. The availability
+schedule progressively exposes easy, medium, and eligible local
+hard pairs, whereas ranking is recomputed independently by each
+client in every round.
+For a preference pair 𝑧=(𝑥, 𝑦 𝑤 , 𝑦𝑙 ), define the sequence-level
+chosen–rejected log-probability gap under policy𝜋 𝜙 as
+𝑔𝜙 (𝑧)=log𝜋 𝜙 (𝑦𝑤 |𝑥) −log𝜋 𝜙 (𝑦𝑙 |𝑥).(4)
+Here, 𝜋𝜙 (𝑦|𝑥) denotes the autoregressive probability of the com-
+plete response sequence𝑦conditioned on𝑥.
+In Round 1, no preceding personalized checkpoint is available.
+We therefore use the initial policy gap as a cold-start score. From
+Round 2 onward, the scoring policy is compared with the check-
+point retained from the preceding round:
+𝑚𝑡
+𝑖 (𝑧)=
+ 
+
+𝛽𝑔𝜃 0
+𝑖
+(𝑧), 𝑡=1,
+𝛽
+h
+𝑔𝜃𝑡−1
+𝑖
+(𝑧) −𝑔 stopgrad(𝜃 𝑡−2
+𝑖 ) (𝑧)
+i
+, 𝑡≥2.
+(5)
+For 𝑡≥ 2, Eq. (5) is the difference between the implicit DPO re-
+wards assigned to the preferred and rejected responses. Specifically,
+defining
+b𝑟𝑡
+𝑖 (𝑥, 𝑦)=𝛽log
+𝜋𝜃𝑡−1
+𝑖
+(𝑦|𝑥)
+𝜋𝜃𝑡−2
+𝑖
+(𝑦|𝑥) ,(6)
+gives
+𝑚𝑡
+𝑖 (𝑧)=b𝑟𝑡
+𝑖 (𝑥, 𝑦𝑤 ) −b𝑟𝑡
+𝑖 (𝑥, 𝑦𝑙 ).(7)
+Thus, for 𝑡≥ 2, 𝑚𝑡
+𝑖 (𝑧) represents the implicit-reward difference
+between the chosen and rejected responses and quantifies the tem-
+poral change in their sequence-level log-probability gap. This is the
+same reward-margin form used by BeeS [8], with a client-specific
+historical checkpoint as reference. A positive margin indicates in-
+creasing relative support for the supplied ordering; it does not
+require 𝑔𝜃𝑡−1
+𝑖
+(𝑧)> 0. For example, a gap changing from −8to −6
+yields a positive margin. The margin therefore measures reference-
+relative preference improvement, not absolute agreement with the
+given ordering.
+Conditional link to preference validity.Let 𝑞𝑖 (𝑧)=𝑟 ∗
+𝑖 (𝑥, 𝑦𝑤 ) −
+𝑟 ∗
+𝑖 (𝑥, 𝑦𝑙 ) be the clean client-specific reward gap. Under Bradley–
+Terry preferences, an independent clean comparison agrees with the
+supplied ordering with probability 𝑝𝑖 (𝑧)=𝜎(𝑞 𝑖 (𝑧)) , conditional on
+the candidate and pre-comparison history. If𝑚𝑡
+𝑖 (𝑧)=𝑎 𝑡
+𝑖 𝑞𝑖 (𝑧)+𝑒 𝑡
+𝑖 (𝑧),
+with𝑎 𝑡
+𝑖 >0and|𝑒 𝑡
+𝑖 (𝑧)| ≤𝛿 𝑡
+𝑖 over the candidate pool, then
+𝑝𝑖 (𝑧) ≥𝜎
+𝑚𝑡
+𝑖 (𝑧) −𝛿 𝑡
+𝑖
+𝑎𝑡
+𝑖
+
+.(8)
+Larger margins therefore improve a conditional validity lower
+bound. This supports margin-based ranking, without establish-
+ing calibrated confidence or reasoning correctness. Appendix B
+provides the derivation, selected-set guarantee, and limitations,
+including the separate cold-start assumption for Round 1.
+We map the margin to a bounded ordinal score:
+𝑐𝑡
+𝑖 (𝑧)=clip
+ clip(𝑚𝑡
+𝑖 (𝑧), 𝐿, 𝑈) −𝐿
+𝑈−𝐿 , 𝜖,1−𝜖
+
+,(9)
+where 𝐿<𝑈 and0 <𝜖< 1/2. The clipping interval [𝐿, 𝑈] controls
+score saturation rather than calibrating preference probabilities. For
+3

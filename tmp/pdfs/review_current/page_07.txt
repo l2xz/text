@@ -1,0 +1,251 @@
+697
+698
+699
+700
+701
+702
+703
+704
+705
+706
+707
+708
+709
+710
+711
+712
+713
+714
+715
+716
+717
+718
+719
+720
+721
+722
+723
+724
+725
+726
+727
+728
+729
+730
+731
+732
+733
+734
+735
+736
+737
+738
+739
+740
+741
+742
+743
+744
+745
+746
+747
+748
+749
+750
+751
+752
+753
+754
+FedCARE: Client-Adaptive Curriculum and Reference Evolution for Federated Direct Preference Optimization WWW ’27, Dates to be confirmed, Location to be confirmed
+755
+756
+757
+758
+759
+760
+761
+762
+763
+764
+765
+766
+767
+768
+769
+770
+771
+772
+773
+774
+775
+776
+777
+778
+779
+780
+781
+782
+783
+784
+785
+786
+787
+788
+789
+790
+791
+792
+793
+794
+795
+796
+797
+798
+799
+800
+801
+802
+803
+804
+805
+806
+807
+808
+809
+810
+811
+812
+−10 0 10 20
+Client margin
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12Density
+All: 15.0k
+Selected: 5.2k
+Easy: 5.2k
+Round 1
+−0.2 0.0 0.2 0.4
+Client margin
+0
+1
+2
+3
+4 All: 24.9k
+Selected: 7.0k
+Easy: 4.8k
+Medium: 2.2k
+Round 2
+−1 0 1 2
+Client margin
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+All: 26.4k
+Selected: 7.0k
+Easy: 4.1k
+Medium: 2.2k
+Hard: 810
+Round 3
+All candidates
+Selected data
+Easy
+Medium
+Hard
+5-95% range
+Median
+Figure 3: Model-aware curriculum selection on MATH across three communication rounds. Each panel shows the client-margin
+distribution of all candidates and the selected samples, grouped by difficulty.
+0 1 2 3
+Communication round
+0
+5
+10Accuracy gain over Round 0
++10.95
+(a) Mathematical reasoning
+0 1 2 3
+Communication round
+0
+10BLEU gain over Round 0
++12.96
+(b) Code generation
+Local DPO FedIT FedVA FedSA-LoRA Ours
+Figure 4: Performance gains under a fixed communication
+budget. Round 0 denotes the initial model before federated
+preference optimization.
+Table 4: Performance with different backbone models. Each
+backbone is trained in a separate federated run.
+Backbone Size Base FedIT FedV A FedSA Ours
+Qwen2.57B 59.31 64.86 64.74 67.26 70.26
+Qwen-2.5-Math7B 51.53 56.18 54.56 55.07 56.87
+Llama-3.23B 2.41 4.17 4.71 4.86 5.46
+Mistral7B 0.46 5.10 3.57 4.47 8.03
+5 10 20 50
+Number of clients
+60
+70
+80Accuracy
+78.76
+71.90
+68.90
+66.89
+Base 58.78
+(a) Client scalability
+0.1 0.5 1.0
+Dirichlet α
+55
+60
+65
+70
+75Accuracy
+71.90 72.68 73.05
+Base 58.78
+(b) Data heterogeneity
+Ours Base
+Figure 5: Scalability ofFedCAREon GSM8K. Smaller 𝛼 indi-
+cates stronger client heterogeneity.
+4.3 Generalization and Robustness Analysis
+Analysis of Cross-Domain Generalization.Table 3 reports Pass@1
+performance under cross-domain federated heterogeneity.Fed-
+CAREobtains the highest macro average in this protocol. However,
+its margin over Local DPO is small, and it does not achieve the best
+score on every individual task. We therefore interpret this result as
+evidence of a favorable aggregate trade-off under this federation,
+rather than uniform superiority across domains.
+Analysis of Backbone Robustness.Table 4 shows thatFedCARE
+consistently improves performance across different backbone mod-
+els. The gains appear on Qwen2.5, Qwen2.5-Math, Llama-3.2, and
+Mistral, indicating that the proposed method is not tied to a spe-
+cific base model family. Although the absolute performance varies
+with the backbone capability, the consistent improvement suggests
+that client-adaptive curriculum selection remains beneficial under
+different initialization strengths.
+Analysis of Client Scalability.Figure 5 evaluatesFedCAREwith
+increasing client counts and different Dirichlet heterogeneity levels.
+As the federation grows, accuracy decreases from 78.76% to 66.89%
+in Figure 5(a), highlighting the challenges of learning across a larger
+federation under the evaluated partitioning protocol. Nevertheless,
+FedCAREremains applicable across the tested client scales, using
+client-specific curriculum selection and selective LoRA sharing
+without pooling client preference data. These results support its
+applicability to larger federations while identifying performance
+degradation with increasing scale as an area for further improve-
+ment.
+4.4 Ablation Study
+Analysis of Aggregation Rules.Table 5 compares single-run point
+estimates obtained with different server-side aggregation rules.
+Their macro averages are close:FedCAREwith FedAvg obtains
+70.26%, compared with 70.16% for FedProx, 69.34% for FedAdam,
+and 69.00% for FedYogi. The 0.10-point difference between FedAvg
+and FedProx is too small to support a claim that one aggregation rule
+is statistically superior. Instead, the result shows that the proposed
+framework does not require a complex server optimizer to obtain
+7

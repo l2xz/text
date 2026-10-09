@@ -1,0 +1,269 @@
+929
+930
+931
+932
+933
+934
+935
+936
+937
+938
+939
+940
+941
+942
+943
+944
+945
+946
+947
+948
+949
+950
+951
+952
+953
+954
+955
+956
+957
+958
+959
+960
+961
+962
+963
+964
+965
+966
+967
+968
+969
+970
+971
+972
+973
+974
+975
+976
+977
+978
+979
+980
+981
+982
+983
+984
+985
+986
+FedCARE: Client-Adaptive Curriculum and Reference Evolution for Federated Direct Preference Optimization WWW ’27, Dates to be confirmed, Location to be confirmed
+987
+988
+989
+990
+991
+992
+993
+994
+995
+996
+997
+998
+999
+1000
+1001
+1002
+1003
+1004
+1005
+1006
+1007
+1008
+1009
+1010
+1011
+1012
+1013
+1014
+1015
+1016
+1017
+1018
+1019
+1020
+1021
+1022
+1023
+1024
+1025
+1026
+1027
+1028
+1029
+1030
+1031
+1032
+1033
+1034
+1035
+1036
+1037
+1038
+1039
+1040
+1041
+1042
+1043
+1044
+References
+[1] Manoj Ghuhan Arivazhagan, Vinay Aggarwal, Aaditya Kumar Singh, and
+Sunav Choudhary. 2019. Federated Learning with Personalization Layers.
+arXiv:1912.00818 [cs.LG] https://arxiv.org/abs/1912.00818
+[2] Mohammad Gheshlaghi Azar, Zhaohan Daniel Guo, Bilal Piot, Remi Munos,
+Mark Rowland, Michal Valko, and Daniele Calandriello. 2024. A general theoret-
+ical paradigm to understand learning from human preferences. InInternational
+Conference on Artificial Intelligence and Statistics. PMLR, 4447–4455.
+[3] Jiamu Bai, Daoyuan Chen, Bingchen Qian, Liuyi Yao, and Yaliang Li. 2024. Fed-
+erated fine-tuning of large language models under heterogeneous tasks and
+client resources.Advances in Neural Information Processing Systems37 (2024),
+14457–14483.
+[4] Yoshua Bengio, Jérôme Louradour, Ronan Collobert, and Jason Weston. 2009.
+Curriculum learning. InProceedings of the 26th annual international conference
+on machine learning. 41–48.
+[5] Paul F Christiano, Jan Leike, Tom Brown, Miljan Martic, Shane Legg, and Dario
+Amodei. 2017. Deep reinforcement learning from human preferences.Advances
+in neural information processing systems30 (2017).
+[6] Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun,
+Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano,
+Christopher Hesse, and John Schulman. 2021. Training Verifiers to Solve Math
+Word Problems. arXiv:2110.14168 [cs.LG] https://arxiv.org/abs/2110.14168
+[7] Liam Collins, Hamed Hassani, Aryan Mokhtari, and Sanjay Shakkottai. 2021.
+Exploiting shared representations for personalized federated learning. InInter-
+national conference on machine learning. PMLR, 2089–2099.
+[8] Xun Deng, Han Zhong, Rui Ai, Fuli Feng, Zheng Wang, and Xiangnan He. 2025.
+Less is more: Improving llm alignment via preference data selection.Advances
+in Neural Information Processing Systems38 (2025), 161259–161285.
+[9] Kawin Ethayarajh, Winnie Xu, Niklas Muennighoff, Dan Jurafsky, and Douwe
+Kiela. 2024. KTO: Model Alignment as Prospect Theoretic Optimization.
+arXiv:2402.01306 [cs.LG] https://arxiv.org/abs/2402.01306
+[10] Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Ab-
+hishek Kadian, Ahmad Al-Dahle, Aiesha Letman, Akhil Mathur, Alan Schelten,
+Alex Vaughan, et al. 2024. The Llama 3 Herd of Models. arXiv:2407.21783 [cs.AI]
+https://arxiv.org/abs/2407.21783
+[11] Pengxin Guo, Shuang Zeng, Yanran Wang, Huijie Fan, Feifei Wang, and
+Liangqiong Qu. 2025. Selective aggregation for low-rank adaptation in feder-
+ated learning. InInternational Conference on Learning Representations, Vol. 2025.
+99003–99027.
+[12] Dan Hendrycks, Steven Basart, Saurav Kadavath, Mantas Mazeika, Akul Arora,
+Ethan Guo, Collin Burns, Samir Puranik, Horace He, Dawn Song, and Jacob
+Steinhardt. 2021. Measuring Coding Challenge Competence With APPS.NeurIPS
+(2021).
+[13] Dan Hendrycks, Collin Burns, Saurav Kadavath, Akul Arora, Steven Basart, Eric
+Tang, Dawn Song, and Jacob Steinhardt. 2021. Measuring Mathematical Problem
+Solving With the MATH Dataset.NeurIPS(2021).
+[14] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean
+Wang, Liang Wang, Weizhu Chen, et al. 2022. Lora: Low-rank adaptation of large
+language models.Iclr1, 2 (2022), 3.
+[15] Jian Hu, Xibin Wu, Wei Shen, Jason Klein Liu, Zilin Zhu, Weixun Wang, Songlin
+Jiang, Haoran Wang, Hao Chen, Bin Chen, Weikai Fang, Xianyu, Yu Cao, Haotian
+Xu, and Yiming Liu. 2025. OpenRLHF: An Easy-to-use, Scalable and High-
+performance RLHF Framework. arXiv:2405.11143 [cs.AI] https://arxiv.org/abs/
+2405.11143
+[16] Hamel Husain, Ho-Hsiang Wu, Tiferet Gazit, Miltiadis Allamanis, and Marc
+Brockschmidt. 2020. CodeSearchNet Challenge: Evaluating the State of Semantic
+Code Search. arXiv:1909.09436 [cs.LG] https://arxiv.org/abs/1909.09436
+[17] Albert Q. Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bamford, De-
+vendra Singh Chaplot, Diego de las Casas, Florian Bressand, Gianna Lengyel,
+Guillaume Lample, Lucile Saulnier, Lélio Renard Lavaud, Marie-Anne Lachaux,
+Pierre Stock, Teven Le Scao, Thibaut Lavril, Thomas Wang, Timothée Lacroix,
+and William El Sayed. 2023. Mistral 7B. arXiv:2310.06825 [cs.CL] https:
+//arxiv.org/abs/2310.06825
+[18] Peter Kairouz and H Brendan McMahan. 2021. Advances and open problems in
+federated learning.Foundations and trends in machine learning14, 1-2 (2021),
+1–210.
+[19] M Kumar, Benjamin Packer, and Daphne Koller. 2010. Self-paced learning for
+latent variable models.Advances in neural information processing systems23
+(2010).
+[20] Tian Li, Anit Kumar Sahu, Ameet Talwalkar, and Virginia Smith. 2020. Federated
+learning: Challenges, methods, and future directions.IEEE signal processing
+magazine37, 3 (2020), 50–60.
+[21] Tian Li, Anit Kumar Sahu, Manzil Zaheer, Maziar Sanjabi, Ameet Talwalkar,
+and Virginia Smith. 2020. Federated optimization in heterogeneous networks.
+Proceedings of Machine learning and systems2 (2020), 429–450.
+[22] Hunter Lightman, Vineet Kosaraju, Yuri Burda, Harrison Edwards, Bowen Baker,
+Teddy Lee, Jan Leike, John Schulman, Ilya Sutskever, and Karl Cobbe. 2024.
+Let’s verify step by step. InInternational Conference on Learning Representations,
+Vol. 2024. 39578–39601.
+[23] Ji Liu, Jiaxiang Ren, Ruoming Jin, Zijie Zhang, Yang Zhou, Patrick Valduriez,
+and Dejing Dou. 2024. Fisher information-based efficient curriculum federated
+learning with large language models. InProceedings of the 2024 Conference on
+Empirical Methods in Natural Language Processing. 10497–10523.
+[24] Shunyu Liu, Wenkai Fang, Zetian Hu, Junjie Zhang, Yang Zhou, Kongcheng
+Zhang, Rongcheng Tu, Ting-En Lin, Fei Huang, Mingli Song, Yongbin Li,
+and Dacheng Tao. 2025. A Survey of Direct Preference Optimization.
+arXiv:2503.11701 [cs.LG] https://arxiv.org/abs/2503.11701
+[25] Yao Lu, Jiaxing QI, Zhongzhi Luan, Shaohan Huang, Carol Fung, Hailong Yang,
+and Depei Qian. 2026. FDLoRA: Personalized Federated Learning of Large
+Language Model via Dual LoRA Tuning. arXiv:2406.07925 [cs.DC] https://arxiv.
+org/abs/2406.07925
+[26] Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, and
+Blaise Aguera y Arcas. 2017. Communication-efficient learning of deep networks
+from decentralized data. InArtificial intelligence and statistics. Pmlr, 1273–1282.
+[27] Yu Meng, Mengzhou Xia, and Danqi Chen. 2024. Simpo: Simple preference
+optimization with a reference-free reward.Advances in Neural Information
+Processing Systems37 (2024), 124198–124235.
+[28] Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela
+Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al. 2022.
+Training language models to follow instructions with human feedback.Advances
+in neural information processing systems35 (2022), 27730–27744.
+[29] Pulkit Pattnaik, Rishabh Maheshwary, Kelechi Ogueji, Vikas Yadav, and Sath-
+wik Tejaswi Madhusudhan. 2024. Enhancing alignment using curriculum learn-
+ing & ranked preferences. InFindings of the Association for Computational Lin-
+guistics: EMNLP 2024. 12891–12907.
+[30] Emmanouil Antonios Platanios, Otilia Stretcu, Graham Neubig, Barnabas Poczos,
+and Tom Mitchell. 2019. Competence-based curriculum learning for neural
+machine translation. InProceedings of the 2019 conference of the North Amer-
+ican chapter of the association for computational linguistics: human language
+technologies, volume 1 (long and short papers). 1162–1172.
+[31] Rafael Rafailov, Archit Sharma, Eric Mitchell, Christopher D Manning, Stefano
+Ermon, and Chelsea Finn. 2023. Direct preference optimization: Your language
+model is secretly a reward model.Advances in neural information processing
+systems36 (2023), 53728–53741.
+[32] Nisan Stiennon, Long Ouyang, Jeffrey Wu, Daniel Ziegler, Ryan Lowe, Chelsea
+Voss, Alec Radford, Dario Amodei, and Paul F Christiano. 2020. Learning to
+summarize with human feedback.Advances in neural information processing
+systems33 (2020), 3008–3021.
+[33] Alysa Ziying Tan, Han Yu, Lizhen Cui, and Qiang Yang. 2023. Towards per-
+sonalized federated learning.IEEE transactions on neural networks and learning
+systems34, 12 (2023), 9587–9603.
+[34] Qwen Team. 2024. Qwen2.5: A Party of Foundation Models. https://qwenlm.
+github.io/blog/qwen2.5/
+[35] Xuezhi Wang, Jason Wei, Dale Schuurmans, Quoc Le, Ed Chi, Sharan Narang,
+Aakanksha Chowdhery, and Denny Zhou. 2023. Self-Consistency Improves
+Chain of Thought Reasoning in Language Models. arXiv:2203.11171 [cs.CL]
+https://arxiv.org/abs/2203.11171
+[36] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Fei Xia, Ed Chi,
+Quoc V Le, Denny Zhou, et al. 2022. Chain-of-thought prompting elicits reason-
+ing in large language models.Advances in neural information processing systems
+35 (2022), 24824–24837.
+[37] An Yang, Baosong Yang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Zhou,
+Chengpeng Li, Chengyuan Li, Dayiheng Liu, Fei Huang, Guanting Dong, Hao-
+ran Wei, Huan Lin, Jialong Tang, Jialin Wang, Jian Yang, Jianhong Tu, Jian-
+wei Zhang, Jianxin Ma, Jianxin Yang, et al . 2024. Qwen2 Technical Report.
+arXiv:2407.10671 [cs.CL] https://arxiv.org/abs/2407.10671
+[38] An Yang, Beichen Zhang, Binyuan Hui, Bofei Gao, Bowen Yu, Chengpeng Li,
+Dayiheng Liu, Jianhong Tu, Jingren Zhou, Junyang Lin, et al. 2024. Qwen2.5-Math
+Technical Report: Toward Mathematical Expert Model via Self-Improvement.
+arXiv:2409.12122 [cs.CL] https://arxiv.org/abs/2409.12122
+[39] Rui Ye, Wenhao Wang, Jingyi Chai, Dihan Li, Zexi Li, Yinda Xu, Yaxin Du, Yanfeng
+Wang, and Siheng Chen. 2024. Openfedllm: Training large language models on
+decentralized private data via federated learning. InProceedings of the 30th ACM
+SIGKDD conference on knowledge discovery and data mining. 6137–6147.
+[40] Liping Yi, Han Yu, Gang Wang, Xiaoguang Liu, and Xiaoxiao Li. 2024. pFed-
+LoRA: Model-Heterogeneous Personalized Federated Learning with LoRA Tun-
+ing. arXiv:2310.13283 [cs.LG] https://arxiv.org/abs/2310.13283
+[41] Longhui Yu, Weisen Jiang, Han Shi, Jincheng Yu, Zhengying Liu, Yu Zhang,
+James T. Kwok, Zhenguo Li, Adrian Weller, and Weiyang Liu. 2024. Meta-
+Math: Bootstrap Your Own Mathematical Questions for Large Language Models.
+arXiv:2309.12284 [cs.CL] https://arxiv.org/abs/2309.12284
+9

@@ -1,0 +1,23 @@
+# Data, models, checkpoints, and generated artifacts are not part of the release.
+data/*
+!data/README.md
+model/
+models/
+checkpoints/
+outputs/
+runs/
+results/
+logs/
+wandb/
+
+__pycache__/
+*.py[cod]
+*.so
+*.log
+*.jsonl
+*.parquet
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt

@@ -1,0 +1,234 @@
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+WWW ’27, Dates to be confirmed, Location to be confirmed Anon. Submission Id: SUBMISSION-ID
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+using its current policy, reference model, and DPO-margin distribu-
+tion. As training proceeds, the selected curriculum expands from
+reliable samples toward more challenging ones, while respecting
+local heterogeneity and privacy.
+Our contributions are summarized as follows:
+• We proposeFedCARE, a federated direct preference op-
+timization framework that integrates FedSA-LoRA-style
+personalization with client-adaptive curriculum selection
+and an update-after-scoring personalized reference refresh
+schedule.
+• We design aClient-Adaptive Curriculum Constructionstrat-
+egy that ranks eligible preference pairs using client-specific
+DPO margins and progressively introduces challenging
+samples. We couple this strategy withDynamic Personalized
+Reference Evolution (DPRE), an update-after-scoring person-
+alized reference refresh schedule, to achieve personalized
+and stable federated DPO.
+• We empirically validateFedCAREon heterogeneous MATH
+and CodeXGLUE benchmarks, demonstrating consistent
+improvements over representative federated preference op-
+timization baselines. Further analyses verify that the gains
+come from adaptive preference selection, personalized pa-
+rameter sharing, and evolving reference policies, rather
+than stronger aggregation alone.
+2 Related Work
+2.1 Federated Parameter-Efficient Adaptation
+Federated learning (FL) lets clients train collaboratively without
+sharing private data. FedAvg aggregates local updates on the server
+[26], but suffers from client drift under non-IID data. FedProx intro-
+duces proximal regularization to stabilize local optimization under
+heterogeneous data [ 21], and recent surveys summarize hetero-
+geneity, communication, privacy, and personalization as central FL
+challenges [18]. Personalized FL mitigates client drift by balanc-
+ing global sharing against local specialization [33]; representative
+approaches include FedPer and FedRep, which separate shared
+representations from client-specific components [ 1, 7]. Because
+full-parameter federated fine-tuning is prohibitive for LLMs, a line
+of work instead updates LoRA adapters over a frozen backbone
+[14, 25, 40]. Most relevant to us, FedSA-LoRA observes that LoRA-A
+and LoRA-B play asymmetric roles and shares only LoRA-A across
+clients [11].FedCAREadopts this selective-sharing principle but,
+unlike prior federated LoRA work aimed at instruction tuning,
+integrates it with preference optimization and margin-driven cur-
+riculum construction for LLMs.
+2.2 Federated Preference Optimization
+Preference optimization aligns LLMs with human or task-specific
+preferences by favoring preferred responses over rejected ones.
+RLHF first trains reward models from human comparisons and
+then optimizes policies with reinforcement learning [ 5, 28, 32].
+DPO removes the explicit reward model by optimizing pairwise
+preferences through a reference-regularized objective [31]. Subse-
+quent methods further analyze or simplify preference optimization,
+such as IPO, KTO, and SimPO [2, 9, 27]. Recent studies begin to con-
+nect alignment with federated learning. OpenFedLLM provides a
+benchmark and framework for decentralized LLM fine-tuning [39].
+FedCAREis complementary: rather than fixing the local preference
+set, each client dynamically selects useful pairs based on its own
+policy and reference model.
+2.3 Curriculum Preference Data Selection
+Curriculum learning improves training by ordering samples mean-
+ingfully, typically from easy to hard [4]. Related ideas such as self-
+paced learning and competence-based curricula further show that
+adaptive data schedules can improve optimization stability [19, 30].
+In preference optimization, difficulty-aware methods construct or
+select preference pairs according to their learning signal. Curry-
+DPO introduces ranked preferences through curriculum learning
+[29], Less is More similarly shows that selecting high-quality pref-
+erence data can improve alignment efficiency [8]. In federated set-
+tings, FibecFed explores curriculum learning for LLM fine-tuning
+under client heterogeneity [23]. Yet these methods either assume
+centralized preference data or do not address DPO-style preference
+optimization, which motivates our client-specific margin-driven
+curriculum.
+3 Method
+3.1 Problem Formulation
+We consider a federated preference optimization setting with 𝑀
+heterogeneous clients. Client𝑖owns a local preference dataset
+P𝑖 ={(𝑥 𝑖,𝑗 , 𝑦𝑤
+𝑖,𝑗 , 𝑦𝑙
+𝑖,𝑗 )}𝑛𝑖
+𝑗=1,(1)
+where 𝑥𝑖,𝑗 is an input prompt, 𝑦𝑤
+𝑖,𝑗 is the preferred response, and𝑦𝑙
+𝑖,𝑗
+is the rejected response.
+Let 𝑊0 denote a frozen pretrained backbone. For each adapted
+layerℓ, client𝑖uses the Dual-LoRA parameterization
+𝑊𝑖,ℓ =𝑊 0,ℓ +𝐵 𝑖,ℓ 𝐴ℓ,(2)
+where 𝐴ℓ is shared across clients and 𝐵𝑖,ℓ remains client-specific.
+We denote their collections byA={𝐴 ℓ }ℓ andB 𝑖 ={𝐵 𝑖,ℓ }ℓ.
+At the beginning of communication round 𝑡∈ { 1, . . . , 𝑇}, client
+𝑖constructs the personalized policy
+𝜃 𝑡−1
+𝑖 ={𝑊 0,A 𝑡−1 ,B 𝑡−1
+𝑖 }, 𝜋 𝑡−1
+𝑖 =𝜋 𝜃𝑡−1
+𝑖
+,(3)
+where A𝑡−1 is broadcast by the server and B𝑡−1
+𝑖 is retained locally.
+The initial LoRA factors induce a near-zero adapter update, so 𝜋𝜃 0
+𝑖
+has the same initial behavior as the frozen backbone. Our objec-
+tive is to transfer shared preference information through A while
+preserving client-specific adaptations inB 𝑖.
+3.2 Method Overview
+FedCAREuses the following order in each communication round:
+candidate scoring, curriculum selection, reference refresh, local
+DPO, and LoRA-𝐴 aggregation. Each client first scores its available
+preference pairs against the reference retained from the preceding
+round and constructs a client-adaptive curriculum. Only after selec-
+tion does DPRE refresh the reference from the current personalized
+checkpoint. The client then optimizes its local policy against this
+frozen reference and uploads the updated LoRA-𝐴 factor. Round 1
+uses the base-policy preference gap for curriculum scoring, as spec-
+ified in Eq. (5).
+2

@@ -1,0 +1,84 @@
+diff --git a/openrlhf/trainer/dpo_trainer.py b/openrlhf/trainer/dpo_trainer.py
+index 7857fbc..e4ab4c2 100644
+--- a/openrlhf/trainer/dpo_trainer.py
++++ b/openrlhf/trainer/dpo_trainer.py
+@@ -63,6 +63,10 @@ class DPOTrainer(ABC):
+         self.beta = beta
+         self.loss_fn = DPOLoss(self.beta, self.args.label_smoothing, self.args.ipo)
+ 
++        # Training-only statistics used by federated aggregation.
++        # These are computed only from the local training dataloader, not from test/eval data.
++        self.train_stats = {}
++
+         # Mixtral 8*7b
+         self.aux_loss = self.args.aux_loss_coef > 1e-8
+ 
+@@ -122,6 +126,22 @@ class DPOTrainer(ABC):
+         )
+         acc_sum = 0
+         loss_sum = 0
++
++        # Aggregate training metrics over all local optimization steps.
++        # The server can use these to down-weight clients whose local DPO training is unstable.
++        train_stat_sums = {
++            "loss": 0.0,
++            "preference_loss": 0.0,
++            "acc": 0.0,
++            "chosen_reward": 0.0,
++            "reject_reward": 0.0,
++            "margin": 0.0,
++            "len_diff": 0.0,
++            "chosen_len": 0.0,
++            "reject_len": 0.0,
++        }
++        train_stat_count = 0
++
+         for epoch in range(start_epoch, self.epochs):
+             if isinstance(self.train_dataloader.sampler, DistributedSampler):
+                 self.train_dataloader.sampler.set_epoch(
+@@ -190,6 +210,20 @@ class DPOTrainer(ABC):
+                     logs_dict["nll_loss"] = nll_loss.item()
+                 # step bar
+                 logs_dict = self.strategy.all_reduce(logs_dict)
++
++                # Accumulate TRAINING-ONLY metrics after distributed all-reduce.
++                # No evaluation/test information is used here.
++                train_stat_sums["loss"] += float(logs_dict.get("loss", 0.0))
++                train_stat_sums["preference_loss"] += float(logs_dict.get("preference_loss", 0.0))
++                train_stat_sums["acc"] += float(logs_dict.get("acc", 0.0))
++                train_stat_sums["chosen_reward"] += float(logs_dict.get("chosen_reward", 0.0))
++                train_stat_sums["reject_reward"] += float(logs_dict.get("reject_reward", 0.0))
++                train_stat_sums["margin"] += float(logs_dict.get("margins", 0.0))
++                train_stat_sums["len_diff"] += float(logs_dict.get("len_diff", 0.0))
++                train_stat_sums["chosen_len"] += float(logs_dict.get("chosen_len", 0.0))
++                train_stat_sums["reject_len"] += float(logs_dict.get("reject_len", 0.0))
++                train_stat_count += 1
++
+                 step_bar.set_postfix(logs_dict)
+                 step_bar.update()
+ 
+@@ -207,11 +241,24 @@ class DPOTrainer(ABC):
+ 
+             epoch_bar.update()
+ 
++        if train_stat_count > 0:
++            self.train_stats = {
++                k: (v / train_stat_count) for k, v in train_stat_sums.items()
++            }
++            self.train_stats["num_steps"] = int(train_stat_count)
++        else:
++            self.train_stats = {"num_steps": 0}
++
+         if self._wandb is not None and self.strategy.is_rank_0():
+             self._wandb.finish()
+         if self._tensorboard is not None and self.strategy.is_rank_0():
+             self._tensorboard.close()
+ 
++        return self.train_stats
++
++    def get_train_stats(self):
++        return dict(getattr(self, "train_stats", {}))
++
+     # logs/checkpoints/evaluate
+     def save_logs_and_checkpoints(self, args, global_step, step_bar, logs_dict={}, client_states={}):
+         if global_step % args.logging_steps == 0:

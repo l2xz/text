@@ -1,0 +1,197 @@
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+WWW ’27, Dates to be confirmed, Location to be confirmed Anon. Submission Id: SUBMISSION-ID
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+Table 1: Performance comparison on heterogeneous federated mathematical reasoning tasks. All results are evaluated with
+pass@1 using one greedily decoded response per problem with temperature0. Centralized denotes a pooled-data DPO reference
+run, rather than an upper bound, because centralized and federated optimization follow different training topologies. Bold
+indicates the best result, and underline indicates the second-best result; the same notation is used in the following tables.
+Task Centralized Base Local DPO FedIT FedV A FedSA-LoRA Ours
+Algebra87.90 80.50 89.30 86.40 86.00 89.30 91.20
+Counting67.10 50.80 63.70 60.50 57.40 66.70 69.60
+Geometry54.50 49.70 58.50 56.20 52.60 56.40 60.80
+Inter. Alg.50.70 47.2054.4050.70 51.60 51.50 53.20
+Num. Theory70.00 62.40 73.90 66.30 69.60 71.50 74.40
+Prealgebra84.00 72.00 81.70 79.70 80.10 80.10 86.20
+Precalc.57.00 52.6057.0054.20 55.90 55.30 56.40
+Avg.67.31 59.31 68.36 64.86 64.74 67.26 70.26
+Selection and Reporting Protocol.FedCAREselects curriculum
+data by greedily ranking eligible preference pairs under the round-
+specific budget and public-data constraints. To ensure a controlled
+comparison, we fix the seeds used for tie-breaking and data order-
+ing across methods; Random Subset is the only variant in which
+candidate membership is sampled randomly. During evaluation,
+all models use greedy decoding with temperature0, making the
+reported scores deterministic for a fixed trained checkpoint. Unless
+otherwise specified, we report checkpoint-level results under this
+fixed protocol, and all comparisons are interpreted under the same
+training budget, data split, and evaluation setting.
+4.2 Overall Performance
+Performance Analysis.Tables 1 and 2 show thatFedCAREim-
+proves federated preference optimization across both mathemati-
+cal reasoning and code-to-text generation. On MATH, our method
+achieves the best average accuracy of 70.26%, exceeding the strongest
+baseline by 1.90 accuracy points. On CodeXGLUE, our method also
+obtains the highest average BLEU score of 24.24, exceeding the
+strongest baseline by 3.47 BLEU. These results indicate that client-
+adaptive curriculum construction, Dual-LoRA personalization, and
+DPRE are effective across different heterogeneous tasks.
+Analysis of Curriculum Evolution.Figure 3 illustrates the selected
+curriculum across communication rounds on MATH. Candidate
+availability follows a staged expansion from easy to medium and
+eligible local hard pairs. Within each stage, however, clients greedily
+reselect samples according to their own margin distributions and
+reliability gates. The adaptive component therefore lies in client-
+specific within-stage selection, rather than in learning the difficulty-
+availability schedule itself.
+Analysis of Communication-Round Dynamics.Figure 4 shows the
+performance gain over the initial model under the same commu-
+nication budget. After three rounds,FedCAREachieves gains of
+10.95 accuracy points on MATH and 12.96 BLEU on CodeXGLUE,
+exceeding the gains of the compared baselines. These results demon-
+strate the effectiveness ofFedCAREin improving mathematical
+reasoning and code-to-text generation over the evaluated commu-
+nication rounds. The favorable gains under a fixed communication
+Table 2: Performance comparison on heterogeneous feder-
+ated code-to-text tasks. BLEU-4 on the CodeXGLUE code-to-
+text test split. Each client is evaluated on its own program-
+ming language.
+Lang. Base Local FedIT FedV A FedSA-LoRA Ours
+Go6.02 9.12 5.48 5.52 8.58 12.06
+Java7.57 10.49 9.62 9.62 9.89 11.06
+JS5.60 7.94 6.23 6.26 7.37 8.53
+PHP10.2716.1213.74 13.76 15.42 14.68
+Py.32.95 74.61 48.35 47.92 73.37 90.81
+Ruby5.28 6.33 6.18 6.44 5.97 8.27
+Avg.11.28 20.77 14.93 14.92 20.10 24.24
+Table 3: Cross-domain generalization under heterogeneous
+federated clients. All tasks are evaluated using Pass@1, and
+all results are reported as percentages.
+Task Base Local FedIT FedV A FedSA Ours
+GSM8K58.78 85.90 81.30 79.10 83.50 86.20
+MATH62.1072.6064.60 67.40 71.50 72.40
+APPS3.94 7.38 4.808.787.80 8.10
+Avg.41.60 55.29 50.23 51.76 54.27 55.57
+budget support the overall framework, while the component ab-
+lations further examine the contributions of curriculum selection,
+personalization, and reference evolution.
+Separate Cross-Domain Protocol.Table 3 is obtained from a sepa-
+rate cross-domain federation, in which GSM8K, MATH, and APPS
+constitute different task-domain clients. It therefore uses a differ-
+ent client partition and training pool from the subject-partitioned
+MATH setting in Table 1; the two MATH scores should not be
+interpreted as repeated measurements under an identical protocol.
+6
